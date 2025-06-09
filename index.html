@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Becher.eu</title>
+<style>
+  /* ==========================
+     GRUNDLAGEN UND RESET
+     ========================== */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #130833;
+    color: #ff00ff;
+    overflow-x: hidden;
+  }
+
+  /* ==========================
+     WASSERTROPFEN-HINTERGRUND
+     ========================== */
+  body {
+    position: relative;
+    overflow: hidden;
+  }
+  .droplet {
+    position: absolute;
+    background: radial-gradient(circle at center, rgba(187,153,255,0.6), transparent 70%);
+    border-radius: 50%;
+    opacity: 0.2;
+    animation-name: floatUp;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes floatUp {
+    0% {
+      transform: translateY(100vh) scale(0.5);
+      opacity: 0;
+    }
+    30% {
+      opacity: 0.2;
+    }
+    70% {
+      opacity: 0.2;
+    }
+    100% {
+      transform: translateY(-10vh) scale(1);
+      opacity: 0;
+    }
+  }
+
+  /* ==========================
+     HEADER MIT LOGO UND NAV
+     ========================== */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 70px;
+    background: rgba(38, 0, 64, 0.9);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    z-index: 1000;
+  }
+  #logo {
+    height: 50px;
+    margin-right: 15px;
+  }
+  #logo-text {
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: #bb99ff;
+    user-select: none;
+  }
+
+  nav {
+    margin-left: auto;
+    display: flex;
+    gap: 15px;
+  }
+  nav button {
+    background: none;
+    border: none;
+    color: #bb99ff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    user-select: none;
+  }
+  nav button:hover, nav button.active {
+    background-color: #bb99ff;
+    color: #250060;
+  }
+
+  #logout-btn {
+    background-color: #ff4d6d;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #logout-btn:hover {
+    background-color: #e63950;
+  }
+
+  /* ==========================
+     LOGIN-BEREICH
+     ========================== */
+  #login-section {
+    max-width: 400px;
+    margin: 130px auto 20px;
+    background: rgba(38, 0, 64, 0.85);
+    padding: 30px 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(187, 153, 255, 0.3);
+    text-align: center;
+  }
+  #login-section h1 {
+    margin-bottom: 25px;
+    font-weight: 900;
+    color: #bb99ff;
+  }
+  #invite-code-input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 25px;
+    border: none;
+    font-size: 1.1rem;
+    outline: none;
+    margin-bottom: 15px;
+    background: #3d007a;
+    color: #ddd;
+    box-shadow: inset 0 0 8px #6b39e3;
+    transition: box-shadow 0.3s ease;
+  }
+  #invite-code-input:focus {
+    box-shadow: 0 0 12px #bb99ff;
+  }
+  #login-btn {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 1.2rem;
+    font-weight: 900;
+    border-radius: 25px;
+    border: none;
+    background: #bb99ff;
+    color: #250060;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #login-btn:hover {
+    background: #a07de0;
+  }
+  #login-alert {
+    margin-top: 12px;
+    min-height: 22px;
+    font-weight: 700;
+  }
+
+  /* ==========================
+     HAUPT-BEREICH: SHOP & ADMIN
+     ========================== */
+  main {
+    max-width: 1100px;
+    margin: 100px auto 50px;
+    padding: 0 20px 50px;
+  }
+
+  /* Kategorien Buttons */
+  #category-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  #category-buttons button {
+    padding: 14px 25px;
+    font-weight: 900;
+    font-size: 1.15rem;
+    border: none;
+    border-radius: 30px;
+    background: #5a22aa;
+    color: #ddd;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(187,153,255,0.3);
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  #category-buttons button:hover {
+    background: #bb99ff;
+    color: #250060;
+  }
+
+  /* Produkt-Liste */
+  #product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+    gap: 30px;
+  }
+  .product-card {
+    background: #3d007a;
+    border-radius: 20px;
+    box-shadow: 0 0 15px #bb99ff80;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px #bb99ffcc;
+  }
+  .product-img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .product-name {
+    font-weight: 900;
+    font-size: 1.3rem;
+    margin: 12px 15px 0 15px;
+    color: #d9bfff;
+  }
+  .product-desc {
+    font-size: 0.9rem;
+    margin: 8px 15px;
+    color: #b0a3c6;
+    flex-grow: 1;
+  }
+  .product-price {
+    font-weight: 900;
+    font-size: 1.15rem;
+    margin: 10px 15px 15px 15px;
+    color: #bb99ff;
+  }
+
+  #back-to-categories {
+    display: block;
+    margin: 30px auto 0;
+    padding: 12px 30px;
+    font-weight: 900;
+    border-radius: 30px;
+    background: #bb99ff;
+    color: #250060;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  #back-to-categories:hover {
+    background: #a07de0;
+  }
+
+  /* ==========================
+     ADMIN-PANEL
+     ========================== */
+  #admin-panel {
+    background: rgba(38, 0, 64, 0.85);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 0 40px #bb99ffaa;
+    user-select: none;
+  }
+  #admin-panel h2 {
+    font-weight: 900;
+    color: #bb99ff;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  /* Invite Verwaltung */
+  #invite-management {
+    margin-bottom: 30px;
+  }
+  #invite-management h3 {
+    color: #bb99ff;
+    font-weight: 900;
+    margin-bottom: 10px;
+  }
+  #invite-type-select {
+    padding: 10px 15px;
+    border-radius: 25px;
+    border: none;
+    background: #5a22aa;
+    color: #ddd;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-right: 15px;
+    cursor: pointer;
+  }
+  #generate-invite-btn {
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: none;
+    background: #bb99ff;
+    color: #250060;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #generate-invite-btn:hover {
+    background: #a07de0;
+  }
+  #invite-list {
+    margin-top: 15px;
+    max-height: 120px;
+    overflow-y: auto;
+    background: #3d007a;
+    padding: 10px 15px;
+    border-radius: 15px;
+    box-shadow: inset 0 0 15px #bb99ff66;
+    color: #ddd;
+    font-weight: 700;
+  }
+  .invite-item {
+    margin-bottom: 5px;
+  }
+
+  /* Produkt Formular */
+  #product-form-section {
+    margin-bottom: 40px;
+  }
+  #product-form h3 {
+    color: #bb99ff;
+    font-weight: 900;
+    margin-bottom: 20px;
+  }
+  #product-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #d1bfff;
+  }
+  #product-form input[type="text"],
+  #product-form input[type="number"],
+  #product-form select,
+  #product-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 15px;
+    border: none;
+    background: #5a22aa;
+    color: #ddd;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    resize: vertical;
+  }
+  #product-form textarea {
+    min-height: 80px;
+  }
+  #add-product-btn {
+    padding: 14px 25px;
+    border-radius: 30px;
+    border: none;
+    background: #bb99ff;
+    color: #250060;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #add-product-btn:hover {
+    background: #a07de0;
+  }
+
+  /* Produkt Liste im Admin-Panel */
+  #admin-product-list {
+    max-height: 250px;
+    overflow-y: auto;
+    background: #3d007a;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: inset 0 0 15px #bb99ff66;
+  }
+  .admin-product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #5a22aa;
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-weight: 700;
+    color: #ddd;
+  }
+  .admin-product-item button {
+    background: #ff4d6d;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .admin-product-item button:hover {
+    background: #e63950;
+  }
+
+  /* ==========================
+     FEHLER- UND INFO-MELDUNGEN
+     ========================== */
+  #alert-message {
+    color: #ff4d6d;
+    font-weight: 900;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  /* ==========================
+     RESPONSIVES DESIGN
+     ========================== */
+  @media (max-width: 600px) {
+    #category-buttons {
+      flex-direction: column;
+      gap: 15px;
+    }
+    nav {
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Wassertropfen (animiert & verteilt) -->
+<script>
+  // Anzahl Tropfen
+  const DROPLET_COUNT = 70;
+  for(let i=0; i<DROPLET_COUNT; i++) {
+    const drop = document.createElement('div');
+    drop.className = 'droplet';
+    // Random Position & Größe & Animation-Dauer/-Delay
+    drop.style.left = Math.random() * 100 + 'vw';
+    drop.style.width = (5 + Math.random()*20) + 'px';
+    drop.style.height = drop.style.width;
+    drop.style.animationDuration = (10 + Math.random()*20) + 's';
+    drop.style.animationDelay = (-Math.random()*30) + 's';
+    document.body.appendChild(drop);
+  }
+</script>
+
+<header>
+  <!-- Logo: Hier kannst du dein Logo als Bild einfügen -->
+  <img id="logo" src="logo.jpg" alt="Becher.eu" />
+  <div id="logo-text" aria-label="Becher.eu">Becher.eu</div>
+
+  <nav aria-label="Hauptnavigation">
+    <button id="nav-shop-btn" aria-pressed="true" aria-controls="shop-section">Shop</button>
+    <button id="nav-admin-btn" aria-pressed="false" aria-controls="admin-panel" hidden>Admin Panel</button>
+    <button id="logout-btn" hidden>Logout</button>
+  </nav>
+</header>
+
+<main>
+  <!-- Login -->
+  <section id="login-section" aria-label="Login Bereich">
+    <h1>Becher.eu Showroom</h1>
+    <input type="text" id="invite-code-input" placeholder="Invite-Code" aria-describedby="login-alert" aria-label="Invite-Code Eingabe" autocomplete="off" />
+    <button id="login-btn" aria-label="Einloggen">Einloggen</button>
+    <div id="login-alert" role="alert" aria-live="polite"></div>
+<div id="login-links" style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
+  <button onclick="window.open('https://invite.viber.com/?g2=AQA29Re3wspn%2FlSeEooiJRMXmyYgHU3kBVfX%2BOV5gb38a2q%2Fz3XCAa6DCW%2Bs8QDQ')" style="padding: 10px; border-radius: 25px; background: #bb99ff; color: #250060; font-weight: 700;">Becher.eu Info</button>
+  <button onclick="window.open('https://invite.viber.com/?g2=AQABPbZOSWZai1SeFA4orX%2FRyRwHbrsVDrdxl12cq6RMUIpeg90ikNWiO7O0o4lZ')" style="padding: 10px; border-radius: 25px; background: #bb99ff; color: #250060; font-weight: 700;">Becher.eu Showroom</button>
+  <button onclick="window.open('https://signal.me/#eu/v-7V9ltQwPlJ6mMV-q_qXcJP2vasW287PsLEWZiqFwd7a4aJKqFJ27W7WXiSKR2T')" style="padding: 10px; border-radius: 25px; background: #bb99ff; color: #250060; font-weight: 700;">Kontakt</button>
+</div>
+
+  </section>
+
+  <!-- Shop -->
+  <section id="shop-section" hidden aria-label="Online Shop">
+    <div id="category-buttons" role="tablist" aria-label="Produktkategorien">
+      <button id="category-ott" role="tab" aria-selected="false">Ott</button>
+      <button id="category-hash" role="tab" aria-selected="false">Hash</button>
+      <button id="category-sonstiges" role="tab" aria-selected="false">Sonstiges</button>
+    </div>
+    <div id="product-list" role="list" aria-live="polite" aria-label="Produktliste"></div>
+    <button id="back-to-categories" hidden>Zurück zu Kategorien</button>
+<!-- Feedback-Funktion -->
+<div id="feedback-box" style="margin-top: 30px; text-align: center;">
+  <button id="toggle-feedback-btn" style="padding: 12px 25px; border-radius: 25px; background: #bb99ff; color: #250060; font-weight: 900; cursor: pointer;">Feedback</button>
+  <div id="feedback-container" style="margin-top: 15px; display: none;">
+    <textarea id="feedback-textarea" rows="5" style="width: 90%; max-width: 600px; padding: 12px; border-radius: 10px; border: none; background: #3d007a; color: #ddd; resize: vertical;" placeholder="Gib dein Feedback ein..."></textarea>
+  </div>
+</div>
+
+  </section>
+
+  <!-- Admin Panel -->
+  <section id="admin-panel" hidden aria-label="Admin Panel">
+    <h2>Admin Panel</h2>
+
+    <!-- Invite Verwaltung -->
+    <div id="invite-management" aria-label="Invite Verwaltung">
+      <h3>Invites generieren</h3>
+      <select id="invite-type-select" aria-label="Invite Typ auswählen">
+        <option value="user">User Invite</option>
+        <option value="admin">Admin Invite</option>
+      </select>
+      <button id="generate-invite-btn" aria-label="Invite generieren">Invite generieren</button>
+      <div id="invite-list" aria-live="polite"></div>
+    </div>
+
+    <!-- Produkt hinzufügen -->
+    <div id="product-form-section" aria-label="Produkt hinzufügen">
+      <h3>Produkt hinzufügen</h3>
+      <form id="product-form">
+        <label for="product-name-input">Produktname *</label>
+        <input id="product-name-input" type="text" required autocomplete="off" />
+        <label for="product-image-input">Bild-URL *</label>
+        <input id="product-image-input" type="text" required autocomplete="off" />
+        <label for="product-price-input">Preis in € *</label>
+        <input id="product-price-input" type="number" min="0" step="0.01" required />
+        <label for="product-category-select">Kategorie *</label>
+        <select id="product-category-select" required>
+          <option value="ott">Ott</option>
+          <option value="hash">Hash</option>
+          <option value="sonstiges">Sonstiges</option>
+        </select>
+        <label for="product-description-textarea">Beschreibung</label>
+        <textarea id="product-description-textarea"></textarea>
+        <button type="submit" id="add-product-btn">Produkt hinzufügen</button>
+      </form>
+    </div>
+
+    <!-- Produktliste -->
+    <div id="admin-product-list" aria-label="Liste der Produkte im Admin Panel"></div>
+  </section>
+</main>
+
+<script>
+  'use strict';
+
+  // ======== DATENSTRUKTUREN ========
+  let invites = [
+    { code: 'Admin', type: 'admin' }, // Standard Admin-Invite
+    // Weitere Invites kommen dynamisch hinzu
+  ];
+  let products = [];
+  let currentUser = null;
+  let productIdCounter = 1;
+
+  // ======== DOM ELEMENTE ========
+  const loginSection = document.getElementById('login-section');
+  const loginInput = document.getElementById('invite-code-input');
+  const loginBtn = document.getElementById('login-btn');
+  const loginAlert = document.getElementById('login-alert');
+
+  const navShopBtn = document.getElementById('nav-shop-btn');
+  const navAdminBtn = document.getElementById('nav-admin-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  const shopSection = document.getElementById('shop-section');
+  const categoryButtons = document.querySelectorAll('#category-buttons button');
+  const productList = document.getElementById('product-list');
+  const backToCategoriesBtn = document.getElementById('back-to-categories');
+
+  const adminPanel = document.getElementById('admin-panel');
+  const inviteTypeSelect = document.getElementById('invite-type-select');
+  const generateInviteBtn = document.getElementById('generate-invite-btn');
+  const inviteList = document.getElementById('invite-list');
+
+  const productForm = document.getElementById('product-form');
+  const productNameInput = document.getElementById('product-name-input');
+  const productImageInput = document.getElementById('product-image-input');
+  const productPriceInput = document.getElementById('product-price-input');
+  const productCategorySelect = document.getElementById('product-category-select');
+  const productDescriptionTextarea = document.getElementById('product-description-textarea');
+  const adminProductList = document.getElementById('admin-product-list');
+
+  // ======== HILFSFUNKTIONEN ========
+  function generateInviteCode(length = 10) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+    for(let i=0; i<length; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  function renderInvites() {
+    inviteList.innerHTML = '';
+    if(invites.length === 0) {
+      inviteList.textContent = 'Keine Invites vorhanden.';
+      return;
+    }
+    invites.forEach(inv => {
+      const div = document.createElement('div');
+      div.className = 'invite-item';
+      div.textContent = `Code: ${inv.code} (${inv.type === 'admin' ? 'Admin Invite' : 'User Invite'})`;
+      inviteList.appendChild(div);
+    });
+  }
+
+  function showAlert(msg, isError = true) {
+    loginAlert.style.color = isError ? '#ff4d6d' : '#99ffbb';
+    loginAlert.textContent = msg;
+  }
+
+  function clearAlert() {
+    loginAlert.textContent = '';
+  }
+
+  // ======== PRODUKT-RENDERING ========
+  function renderProductsByCategory(category) {
+    if(!category) return;
+    productList.innerHTML = '';
+    const filtered = products.filter(p => p.category === category);
+    if(filtered.length === 0) {
+      productList.innerHTML = `<p style="text-align:center; color:#bb99ff; font-weight:700;">Keine Produkte in der Kategorie "${category}" vorhanden.</p>`;
+      return;
+    }
+    filtered.forEach(p => {
+      const card = document.createElement('article');
+      card.className = 'product-card';
+      card.setAttribute('role','listitem');
+
+      const img = document.createElement('img');
+      img.className = 'product-img';
+      img.src = p.image;
+      img.alt = `Bild von ${p.name}`;
+      card.appendChild(img);
+
+      const name = document.createElement('h3');
+      name.className = 'product-name';
+      name.textContent = p.name;
+      card.appendChild(name);
+
+      const desc = document.createElement('p');
+      desc.className = 'product-desc';
+      desc.textContent = p.description || 'Keine Beschreibung vorhanden.';
+      card.appendChild(desc);
+
+      const price = document.createElement('p');
+      price.className = 'product-price';
+      price.textContent = `${p.price.toFixed(2)} €`;
+      card.appendChild(price);
+
+      productList.appendChild(card);
+    });
+  }
+
+  function clearProductView() {
+    productList.innerHTML = '';
+  }
+
+  // ======== ADMIN PRODUKT LISTE RENDERN ========
+  function renderAdminProductList() {
+    adminProductList.innerHTML = '';
+    if(products.length === 0) {
+      adminProductList.textContent = 'Keine Produkte vorhanden.';
+      return;
+    }
+    products.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'admin-product-item';
+
+      const info = document.createElement('div');
+      info.textContent = `[${p.category.toUpperCase()}] ${p.name} - ${p.price.toFixed(2)} €`;
+      div.appendChild(info);
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Löschen';
+      delBtn.setAttribute('aria-label', `Produkt ${p.name} löschen`);
+      delBtn.addEventListener('click', () => {
+        if(confirm(`Produkt "${p.name}" wirklich löschen?`)) {
+          products = products.filter(prod => prod.id !== p.id);
+          renderAdminProductList();
+          // Aktualisiere Shop falls Kategorie aktuell angezeigt wird
+          if(!shopSection.hidden && currentCategory === p.category) {
+            renderProductsByCategory(currentCategory);
+          }
+        }
+      });
+      div.appendChild(delBtn);
+
+      adminProductList.appendChild(div);
+    });
+  }
+
+  // ======== LOGIN HANDLUNG ========
+  function login(inviteCode) {
+    clearAlert();
+    const foundInvite = invites.find(i => i.code.toLowerCase() === inviteCode.toLowerCase());
+    if(!foundInvite) {
+      showAlert('Ungültiger Invite-Code!');
+      return false;
+    }
+    currentUser = { code: foundInvite.code, type: foundInvite.type };
+    // Zeige passende UI
+    loginSection.hidden = true;
+    logoutBtn.hidden = false;
+    navShopBtn.disabled = false;
+    navShopBtn.setAttribute('aria-pressed', 'true');
+    shopSection.hidden = false;
+
+    if(currentUser.type === 'admin') {
+      navAdminBtn.hidden = false;
+      navAdminBtn.disabled = false;
+      navAdminBtn.setAttribute('aria-pressed', 'false');
+      adminPanel.hidden = true;
+    } else {
+      navAdminBtn.hidden = true;
+      adminPanel.hidden = true;
+    }
+    renderInvites();
+    renderAdminProductList();
+    showAlert(`Willkommen ${currentUser.type === 'admin' ? 'Admin' : 'User'}!`, false);
+    setFeedbackEditable();
+    return true;
+  }
+
+  function logout() {
+    currentUser = null;
+    loginSection.hidden = false;
+    logoutBtn.hidden = true;
+    navAdminBtn.hidden = true;
+    adminPanel.hidden = true;
+    shopSection.hidden = true;
+    clearAlert();
+    loginInput.value = '';
+    productList.innerHTML = '';
+  }
+
+  // ======== NAVIGATION ========
+  let currentCategory = null;
+
+  navShopBtn.addEventListener('click', () => {
+    if(!currentUser) return;
+    navShopBtn.setAttribute('aria-pressed', 'true');
+    navAdminBtn.setAttribute('aria-pressed', 'false');
+    navShopBtn.classList.add('active');
+    navAdminBtn.classList.remove('active');
+    shopSection.hidden = false;
+    adminPanel.hidden = true;
+    backToCategoriesBtn.hidden = true;
+    currentCategory = null;
+    clearProductView();
+    setCategoryButtonsSelection(null);
+  });
+  navAdminBtn.addEventListener('click', () => {
+    if(!currentUser || currentUser.type !== 'admin') return;
+    navAdminBtn.setAttribute('aria-pressed', 'true');
+    navShopBtn.setAttribute('aria-pressed', 'false');
+    navAdminBtn.classList.add('active');
+    navShopBtn.classList.remove('active');
+    adminPanel.hidden = false;
+    shopSection.hidden = true;
+  });
+  logoutBtn.addEventListener('click', () => {
+    logout();
+  });
+
+  // Kategorie-Buttons
+  categoryButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentCategory = btn.id.replace('category-', '');
+      setCategoryButtonsSelection(btn.id);
+      renderProductsByCategory(currentCategory);
+      backToCategoriesBtn.hidden = false;
+    });
+  });
+
+  backToCategoriesBtn.addEventListener('click', () => {
+    currentCategory = null;
+    backToCategoriesBtn.hidden = true;
+    clearProductView();
+    setCategoryButtonsSelection(null);
+  });
+
+  function setCategoryButtonsSelection(selectedId) {
+    categoryButtons.forEach(btn => {
+      if(btn.id === selectedId) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+      } else {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      }
+    });
+  }
+
+  // ======== LOGIN BUTTON ========
+  loginBtn.addEventListener('click', () => {
+    const code = loginInput.value.trim();
+    if(code.length === 0) {
+      showAlert('Bitte Invite-Code eingeben!');
+      return;
+    }
+    login(code);
+  });
+
+  loginInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      loginBtn.click();
+    }
+  });
+
+  // ======== ADMIN: INVITE GENERIEREN ========
+  generateInviteBtn.addEventListener('click', () => {
+    const type = inviteTypeSelect.value;
+    const newCode = generateInviteCode(10);
+    invites.push({ code: newCode, type });
+    renderInvites();
+    alert(`Neuer ${type === 'admin' ? 'Admin' : 'User'}-Invite generiert:\n${newCode}`);
+  });
+
+  // ======== ADMIN: PRODUKT HINZUFÜGEN ========
+  productForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = productNameInput.value.trim();
+    const image = productImageInput.value.trim();
+    const price = parseFloat(productPriceInput.value);
+    const category = productCategorySelect.value;
+    const description = productDescriptionTextarea.value.trim();
+
+    if(!name || !image || isNaN(price) || price < 0 || !category) {
+      alert('Bitte gültige Produktdaten eingeben!');
+      return;
+    }
+    const newProduct = {
+      id: productIdCounter++,
+      name,
+      image,
+      price,
+      category,
+      description
+    };
+    products.push(newProduct);
+
+    // UI Aktualisieren
+    renderAdminProductList();
+
+    if(!shopSection.hidden && currentCategory === category) {
+      renderProductsByCategory(category);
+    }
+
+    productForm.reset();
+  });
+
+  
+// ======== FEEDBACK ========
+const toggleFeedbackBtn = document.getElementById('toggle-feedback-btn');
+const feedbackContainer = document.getElementById('feedback-container');
+const feedbackTextarea = document.getElementById('feedback-textarea');
+
+toggleFeedbackBtn.addEventListener('click', () => {
+  feedbackContainer.style.display = feedbackContainer.style.display === 'none' ? 'block' : 'none';
+});
+
+function setFeedbackEditable() {
+  if (currentUser?.type === 'admin') {
+    feedbackTextarea.removeAttribute('readonly');
+    feedbackTextarea.style.background = '#3d007a';
+  } else {
+    feedbackTextarea.setAttribute('readonly', true);
+    feedbackTextarea.style.background = '#2a004f';
+  }
+}
+
+
+  // ======== INITIALISIERUNG ========
+  logout();
+</script>
+
+</body>
+</html>
